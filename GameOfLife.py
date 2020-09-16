@@ -1,77 +1,77 @@
 import pygame
 import numpy as np
+import constant as con
 
-RESOLUTION = 10
-WIDTH = 500
-HEIGHT = 900
-COLS = int(WIDTH/RESOLUTION)
-ROWS = int(HEIGHT/RESOLUTION)
-black = (0, 0, 0)
-white = (255, 255, 255)
-    
-def setup():
-    #setup Pygame screen
-    screen = pygame.display.set_mode((WIDTH, HEIGHT))
-    screen.fill([255, 255, 255])
+
+def initializePygame():
+    global screen
+    screen = pygame.display.set_mode((con.WIDTH, con.HEIGHT))
+    screen.fill(con.WHITE)
     pygame.display.set_caption('Conrads Game of Life')
     pygame.display.flip()
-    gameLoop(screen)
+
 
 def makeRandom2DArray():
-    a = np.random.randint(2, size=(COLS, ROWS), dtype=np.int32)
-    return a
+    return np.random.randint(2, size=(con.COLS, con.ROWS))
 
-def gameLoop(screen):
-    cells = makeRandom2DArray()
+
+def makeEmpty2DArray():
+    return np.empty((con.COLS, con.ROWS), int)
+
+
+def gameLoop():
+    grid = makeRandom2DArray()
+    renderGrid(grid)
     running = True
+    pygame.display.update()
     while running:
-        clockobject = pygame.time.Clock()
-        clockobject.tick(15)
+        #clockobject = pygame.time.Clock()
+        #clockobject.tick(30)
+        grid = updateGrid(grid)
+        renderGrid(grid)
+        pygame.display.update()
+
+        #Check to see if user closes game
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-        cells = updateCells(cells)
-        drawScreen(screen, cells)
-        pygame.display.update()
         
 
-
-def updateCells(cells):
-    nextArray = cells
-    for i in range(COLS):
-        for j in range(ROWS):
-            numNeighbors = countNeighbors(cells, i, j)
-            state = cells[i, j]
-
-            if state == 0 and numNeighbors == 3:
-                nextArray[i, j] = 1
-            elif state == 1 and numNeighbors < 2 or numNeighbors > 3:
-                nextArray[i, j] = 0
-            else:
-                nextArray[i, j] = state
-
-    return nextArray
+def renderGrid(currentGrid):
+    for i in range(con.COLS):
+        for j in range(con.ROWS):
+            if currentGrid[i, j] == 1:
+                pygame.draw.rect(screen, con.BLACK, (i*con.RES, j*con.RES, con.RES-1, con.RES-1))
+            elif currentGrid[i, j] == 0:
+                pygame.draw.rect(screen, con.WHITE, (i*con.RES, j*con.RES, con.RES-1, con.RES-1))
 
 
-def countNeighbors(cells, i, j):
+def updateGrid(currentGrid):
+    tempGrid = makeEmpty2DArray()
+    for i in range(con.COLS):
+        for j in range(con.ROWS):
+            state = currentGrid[i, j]
+            sum = countNeighbors(currentGrid, i, j)
+            tempGrid[i][j] = currentGrid[i, j]
+            if state == 0 and sum == 3:
+                tempGrid[i, j] = 1
+            elif state == 1 and sum < 2 or sum > 3:
+                tempGrid[i, j] = 0
+    return tempGrid        
+
+
+def countNeighbors(grid, x, y):
     sum = 0
-    for x in range(-1,2):
-        for y in range(-1,2):
-            col = (i + x + COLS) % COLS
-            row = (j + y + ROWS) % ROWS
-            
-            sum += cells[col, row]
-
-    sum -= cells[x, y]
+    for i in range(-1, 2):
+        for j in range(-1, 2):
+            col = (x + i + con.COLS) % con.COLS
+            row = (y + j + con.ROWS) % con.ROWS
+            sum = sum + grid[col, row]
+    sum = sum - grid[x, y]
     return sum
 
-def drawScreen(screen, cells):
-    for col in range(COLS):
-        for row in range(ROWS):
-            state = cells[col, row]
-            if state == 1:
-                pygame.draw.rect(screen, black, (col*RESOLUTION, row*RESOLUTION, RESOLUTION-1, RESOLUTION-1))
-            elif state == 0:
-                pygame.draw.rect(screen, white, (col*RESOLUTION, row*RESOLUTION, RESOLUTION-1, RESOLUTION-1))
+def run():
+    initializePygame()
+    gameLoop()
 
-setup()
+run()
