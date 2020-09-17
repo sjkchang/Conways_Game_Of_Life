@@ -41,9 +41,9 @@ def renderGrid(currentGrid):
     for i in range(con.COLS):
         for j in range(con.ROWS):
             if currentGrid[i, j] == 1:
-                pygame.draw.rect(screen, con.BLACK, (i*con.RES, j*con.RES, con.RES-1, con.RES-1))
+                pygame.draw.rect(screen, con.CYAN, (i*con.RES, j*con.RES, con.RES-1, con.RES-1))
             elif currentGrid[i, j] == 0:
-                pygame.draw.rect(screen, con.WHITE, (i*con.RES, j*con.RES, con.RES-1, con.RES-1))
+                pygame.draw.rect(screen, con.BLACK, (i*con.RES, j*con.RES, con.RES-1, con.RES-1))
 
 
 def updateGrid(currentGrid):
